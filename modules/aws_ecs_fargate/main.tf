@@ -106,7 +106,7 @@ resource "aws_ecs_task_definition" "retool" {
       "options": {
         "awslogs-group": "${aws_cloudwatch_log_group.this.name}",
         "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}"
+        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}/backend"
       }
     },
     "essential": true,
@@ -167,7 +167,7 @@ resource "aws_ecs_task_definition" "retool_jobs_runner" {
       "options": {
         "awslogs-group": "${aws_cloudwatch_log_group.this.name}",
         "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}"
+        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}/jobs"
       }
     },
     "essential": true,
