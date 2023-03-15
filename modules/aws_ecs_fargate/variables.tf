@@ -85,6 +85,12 @@ variable "rds_instance_class" {
   description = "Instance class for RDS. Defaults to `db.m6g.large`"
 }
 
+variable "rds_postgres_version" {
+  type        = string
+  default     = "13.7"
+  description = "Postgres version for RDS."
+}
+
 variable "rds_publicly_accessible" {
   type        = bool
   default     = false
