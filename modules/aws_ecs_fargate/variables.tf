@@ -265,7 +265,7 @@ variable "force_deployment" {
 variable "alb_listener_ssl_policy" {
   description = "retool_alb_listener_ssl_policy"
   type        = string
-  default     = "ELBSecurityPolicy-2016-08"
+  default     = null
 }
 
 variable "aws_lb_listener_protocol" {
@@ -283,7 +283,7 @@ variable "aws_alb_target_group_protocol" {
 variable "retool_alb_ingress_port" {
   description = "Retool ALB ingress port"
   type        = number
-  default     = "3000"
+  default     = "80"
 }
 
 variable "retool_task_container_port" {

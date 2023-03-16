@@ -8,8 +8,10 @@ resource "aws_lb" "this" {
 
 resource "aws_lb_listener" "this" {
   load_balancer_arn = aws_lb.this.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = var.retool_alb_ingress_port
+  protocol          = var.aws_lb_listener_protocol
+  ssl_policy        = var.alb_listener_ssl_policy
+  certificate_arn   = var.alb_listener_certificate_arn
 
   default_action {
     type             = "forward"
