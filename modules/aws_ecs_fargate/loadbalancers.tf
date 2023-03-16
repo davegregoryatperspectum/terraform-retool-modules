@@ -17,22 +17,6 @@ resource "aws_lb_listener" "this" {
   }
 }
 
-resource "aws_lb_listener_rule" "this" {
-  listener_arn = aws_lb_listener.this.arn
-  priority     = 1
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/"]
-    }
-  }
-}
-
 resource "aws_lb_target_group" "this" {
   name                 = "${var.deployment_name}-target"
   vpc_id               = var.vpc_id
