@@ -76,51 +76,48 @@ resource "aws_ecs_service" "retool" {
 }
 
 resource "aws_ecs_task_definition" "retool" {
-    family                   = "${var.deployment_name}-backend"
-    requires_compatibilities = ["FARGATE"]
-    network_mode             = var.ecs_task_network_mode
-    cpu                      = var.ecs_task_cpu
-    memory                   = var.ecs_task_memory
-    task_role_arn            = aws_iam_role.task_role.arn
-    execution_role_arn       = aws_iam_role.execution_role.arn
-    container_definitions    = <<TASK_DEFINITION
-[
-  {
-    "command": ["./docker_scripts/start_api.sh"],
-    "environment": [
-      {"name": "NODE_ENV", "value": "${var.node_env}"},
-      {"name": "SERVICE_TYPE", "value": "MAIN_BACKEND,DB_CONNECTOR"},
-      {"name": "FORCE_DEPLOYMENT", "value": "${var.force_deployment}"},
-      {"name": "POSTGRES_DB", "value": "hammerhead_production"},
-      {"name": "POSTGRES_HOST", "value": "${aws_db_instance.this.address}"},
-      {"name": "POSTGRES_SSL_ENABLED", "value": "${var.postgresql_ssl_enabled}"},
-      {"name": "POSTGRES_PORT", "value": "${var.postgresql_db_port}"},
-      {"name": "POSTGRES_USER", "value": "${aws_secretsmanager_secret_version.rds_username.secret_string}"},
-      {"name": "POSTGRES_PASSWORD", "value": "${aws_secretsmanager_secret_version.rds_password.secret_string}"},
-      {"name": "JWT_SECRET", "value": "${random_string.jwt_secret.result}"},
-      {"name": "ENCRYPTION_KEY", "value": "${random_string.encryption_key.result}"},
-      {"name": "LICENSE_KEY", "value": "${var.retool_license_key}"},
-      {"name": "COOKIE_INSECURE", "value": "${var.cookie_insecure}"}
-    ],
-    "logConfiguration": {
-      "logDriver": "${var.retool_ecs_tasks_logdriver}",
-      "options": {
-        "awslogs-group": "${aws_cloudwatch_log_group.this.name}",
-        "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}/backend"
-      }
-    },
-    "essential": true,
-    "image": "${local.retool_image}",
-    "name": "${var.retool_task_container_name}",
-    "portMappings": [
-      {
-        "containerPort": ${var.retool_task_container_port}
-      }
-    ]
-  }
-]
-TASK_DEFINITION
+  family                   = "${var.deployment_name}-backend"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = var.ecs_task_network_mode
+  cpu                      = var.ecs_task_cpu
+  memory                   = var.ecs_task_memory
+  task_role_arn            = aws_iam_role.task_role.arn
+  execution_role_arn       = aws_iam_role.execution_role.arn
+  container_definitions = jsonencode([
+    {
+      command = ["./docker_scripts/start_api.sh"],
+      environment = toset(concat(
+        local.environment_variables,
+        [
+          { name = "SERVICE_TYPE", value = "MAIN_BACKEND,DB_CONNECTOR" },
+          { name = "POSTGRES_USER", value = aws_secretsmanager_secret_version.rds_username.secret_string },
+          { name = "POSTGRES_PASSWORD", value = aws_secretsmanager_secret_version.rds_password.secret_string },
+          { name = "JWT_SECRET", value = random_string.jwt_secret.result },
+          { name = "ENCRYPTION_KEY", value = random_string.encryption_key.result },
+          { name = "LICENSE_KEY", value = var.retool_license_key },
+        ],
+      )),
+      secrets = [
+
+      ],
+      logConfiguration = {
+        logDriver = var.retool_ecs_tasks_logdriver,
+        options = {
+          "awslogs-group" : aws_cloudwatch_log_group.this.name,
+          "awslogs-region" : var.aws_region,
+          "awslogs-stream-prefix" : "${var.retool_ecs_tasks_log_prefix}/backend"
+        }
+      },
+      essential = true,
+      image     = local.retool_image,
+      name      = var.retool_task_container_name,
+      portMappings = [
+        {
+          containerPort = var.retool_task_container_port
+        }
+      ]
+    }
+  ])
 }
 
 resource "aws_ecs_service" "jobs_runner" {
@@ -137,51 +134,45 @@ resource "aws_ecs_service" "jobs_runner" {
 }
 
 resource "aws_ecs_task_definition" "retool_jobs_runner" {
-    family                   = "${var.deployment_name}-jobs-runner"
-    requires_compatibilities = ["FARGATE"]
-    network_mode             = var.ecs_task_network_mode
-    cpu                      = var.ecs_task_cpu
-    memory                   = var.ecs_task_memory
-    task_role_arn            = aws_iam_role.task_role.arn
-    execution_role_arn       = aws_iam_role.execution_role.arn
-    container_definitions    = <<TASK_DEFINITION
-[
-  {
-    "command": ["./docker_scripts/start_api.sh"],
-    "environment": [
-      {"name": "NODE_ENV", "value": "${var.node_env}"},
-      {"name": "SERVICE_TYPE", "value": "JOBS_RUNNER"},
-      {"name": "FORCE_DEPLOYMENT", "value": "${var.force_deployment}"},
-      {"name": "POSTGRES_DB", "value": "hammerhead_production"},
-      {"name": "POSTGRES_HOST", "value": "${aws_db_instance.this.address}"},
-      {"name": "POSTGRES_SSL_ENABLED", "value": "${var.postgresql_ssl_enabled}"},
-      {"name": "POSTGRES_PORT", "value": "${var.postgresql_db_port}"},
-      {"name": "POSTGRES_USER", "value": "${aws_secretsmanager_secret_version.rds_username.secret_string}"},
-      {"name": "POSTGRES_PASSWORD", "value": "${aws_secretsmanager_secret_version.rds_password.secret_string}"},
-      {"name": "JWT_SECRET", "value": "${random_string.jwt_secret.result}"},
-      {"name": "ENCRYPTION_KEY", "value": "${random_string.encryption_key.result}"},
-      {"name": "LICENSE_KEY", "value": "${var.retool_license_key}"},
-      {"name": "COOKIE_INSECURE", "value": "${var.cookie_insecure}"}
-    ],
-    "logConfiguration": {
-      "logDriver": "${var.retool_ecs_tasks_logdriver}",
-      "options": {
-        "awslogs-group": "${aws_cloudwatch_log_group.this.name}",
-        "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "${var.retool_ecs_tasks_log_prefix}/jobs"
-      }
-    },
-    "essential": true,
-    "image": "${local.retool_image}",
-    "name": "${var.retool_task_container_name}",
-    "portMappings": [
-      {
-        "containerPort": ${var.retool_task_container_port}
-      }
-    ]
-  }
-]
-TASK_DEFINITION
+  family                   = "${var.deployment_name}-jobs-runner"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = var.ecs_task_network_mode
+  cpu                      = var.ecs_task_cpu
+  memory                   = var.ecs_task_memory
+  task_role_arn            = aws_iam_role.task_role.arn
+  execution_role_arn       = aws_iam_role.execution_role.arn
+  container_definitions = jsonencode([
+    {
+      command = ["./docker_scripts/start_api.sh"],
+      environment = toset(concat(
+        local.environment_variables,
+        [
+          { name = "SERVICE_TYPE", value = "JOBS_RUNNER" },
+          { name = "POSTGRES_USER", value = aws_secretsmanager_secret_version.rds_username.secret_string },
+          { name = "POSTGRES_PASSWORD", value = aws_secretsmanager_secret_version.rds_password.secret_string },
+          { name = "JWT_SECRET", value = random_string.jwt_secret.result },
+          { name = "ENCRYPTION_KEY", value = random_string.encryption_key.result },
+          { name = "LICENSE_KEY", value = var.retool_license_key },
+        ],
+      )),
+      logConfiguration = {
+        logDriver = var.retool_ecs_tasks_logdriver,
+        options = {
+          "awslogs-group" : aws_cloudwatch_log_group.this.name,
+          "awslogs-region" : var.aws_region,
+          "awslogs-stream-prefix" : "${var.retool_ecs_tasks_log_prefix}/jobs"
+        }
+      },
+      essential = true,
+      image     = local.retool_image,
+      name      = var.retool_task_container_name,
+      portMappings = [
+        {
+          containerPort = var.retool_task_container_port
+        }
+      ]
+    }
+  ])
 }
 
 # resource "aws_iam_role" "retool_service_role" {
