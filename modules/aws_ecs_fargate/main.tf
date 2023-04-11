@@ -60,6 +60,7 @@ resource "aws_ecs_service" "retool" {
   desired_count                      = var.ecs_service_count
   deployment_maximum_percent         = var.maximum_percent
   deployment_minimum_healthy_percent = var.minimum_healthy_percent
+  health_check_grace_period_seconds  = var.alb_health_check_grace_period_seconds
   launch_type                        = "FARGATE"
 
   load_balancer {

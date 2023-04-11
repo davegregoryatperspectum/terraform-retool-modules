@@ -189,6 +189,12 @@ variable "alb_extra_egress_rules_map" {
   description = "Extra egress rules (beyond connectivity to Fargate tasks) for load balancer"
 }
 
+variable "alb_health_check_grace_period_seconds" {
+  type = number
+  default = 45
+  description = "Grace period for tasks to start before health checks begin"
+}
+
 variable "ecs_tasks_extra_ingress_rules_map" {
   type = map(
     object({
