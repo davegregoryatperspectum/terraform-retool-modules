@@ -90,15 +90,14 @@ resource "aws_ecs_task_definition" "retool" {
         local.environment_variables,
         [
           { name = "SERVICE_TYPE", value = "MAIN_BACKEND,DB_CONNECTOR" },
-          { name = "POSTGRES_USER", value = aws_secretsmanager_secret_version.rds_username.secret_string },
-          { name = "POSTGRES_PASSWORD", value = aws_secretsmanager_secret_version.rds_password.secret_string },
-          { name = "JWT_SECRET", value = random_string.jwt_secret.result },
-          { name = "ENCRYPTION_KEY", value = random_string.encryption_key.result },
-          { name = "LICENSE_KEY", value = var.retool_license_key },
         ],
       )),
       secrets = [
-
+        { name = "POSTGRES_USER", valueFrom = aws_secretsmanager_secret.rds_username.arn },
+        { name = "POSTGRES_PASSWORD", valueFrom = aws_secretsmanager_secret.rds_password.arn },
+        { name = "JWT_SECRET", valueFrom = aws_secretsmanager_secret.jwt_secret.arn },
+        { name = "ENCRYPTION_KEY", valueFrom = aws_secretsmanager_secret.encryption_key.arn },
+        { name = "LICENSE_KEY", valueFrom = aws_secretsmanager_secret.retool_license_key.arn },
       ],
       logConfiguration = {
         logDriver = var.retool_ecs_tasks_logdriver,
@@ -148,13 +147,15 @@ resource "aws_ecs_task_definition" "retool_jobs_runner" {
         local.environment_variables,
         [
           { name = "SERVICE_TYPE", value = "JOBS_RUNNER" },
-          { name = "POSTGRES_USER", value = aws_secretsmanager_secret_version.rds_username.secret_string },
-          { name = "POSTGRES_PASSWORD", value = aws_secretsmanager_secret_version.rds_password.secret_string },
-          { name = "JWT_SECRET", value = random_string.jwt_secret.result },
-          { name = "ENCRYPTION_KEY", value = random_string.encryption_key.result },
-          { name = "LICENSE_KEY", value = var.retool_license_key },
         ],
       )),
+      secrets = [
+        { name = "POSTGRES_USER", valueFrom = aws_secretsmanager_secret.rds_username.arn },
+        { name = "POSTGRES_PASSWORD", valueFrom = aws_secretsmanager_secret.rds_password.arn },
+        { name = "JWT_SECRET", valueFrom = aws_secretsmanager_secret.jwt_secret.arn },
+        { name = "ENCRYPTION_KEY", valueFrom = aws_secretsmanager_secret.encryption_key.arn },
+        { name = "LICENSE_KEY", valueFrom = aws_secretsmanager_secret.retool_license_key.arn },
+      ],
       logConfiguration = {
         logDriver = var.retool_ecs_tasks_logdriver,
         options = {

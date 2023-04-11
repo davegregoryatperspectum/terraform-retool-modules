@@ -90,7 +90,21 @@ resource "aws_iam_role" "execution_role" {
           ]
           Effect   = "Allow"
           Resource = "*"
-      }]
+      },
+        {
+          Action = [
+            "secretsmanager:GetSecretValue",
+          ]
+          Effect   = "Allow"
+          Resource = [
+            aws_secretsmanager_secret.rds_username.arn,
+            aws_secretsmanager_secret.rds_password.arn,
+            aws_secretsmanager_secret.jwt_secret.arn,
+            aws_secretsmanager_secret.encryption_key.arn,
+            aws_secretsmanager_secret.retool_license_key.arn,
+          ]
+      },
+      ]
     })
   }
 }
