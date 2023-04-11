@@ -49,8 +49,8 @@ locals {
     ]
   )
 
-  db_subnet_group_name                = "${var.deployment_name}-subnet-group"
-  retool_image                        = "${var.ecs_retool_image}"
+  db_subnet_group_name = "${var.deployment_name}-subnet-group"
+  retool_image         = var.ecs_retool_image
 
   retool_jwt_secret = {
     password = aws_secretsmanager_secret_version.jwt_secret

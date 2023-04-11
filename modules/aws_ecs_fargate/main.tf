@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     aws = {
-        source = "hashicorp/aws"
-        version = "~> 4.0"
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
     }
   }
 }
@@ -31,7 +31,7 @@ resource "aws_db_subnet_group" "this" {
 }
 
 resource "aws_db_instance" "this" {
-  identifier                    = "${var.deployment_name}-rds-instance"
+  identifier                   = "${var.deployment_name}-rds-instance"
   allocated_storage            = 80
   instance_class               = var.rds_instance_class
   engine                       = "postgres"
@@ -44,9 +44,9 @@ resource "aws_db_instance" "this" {
   db_subnet_group_name         = local.db_subnet_group_name
   vpc_security_group_ids       = [aws_security_group.rds.id]
   performance_insights_enabled = var.rds_performance_insights_enabled
-  
-  skip_final_snapshot          = true
-  apply_immediately           = true
+
+  skip_final_snapshot = true
+  apply_immediately   = true
 
   depends_on = [
     aws_db_subnet_group.this
