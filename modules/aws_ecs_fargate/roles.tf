@@ -81,10 +81,6 @@ resource "aws_iam_role" "execution_role" {
             "ecr:BatchCheckLayerAvailability",
             "ecr:GetDownloadUrlForLayer",
             "ecr:BatchGetImage",
-            "ecr:PutImage",
-            "ecr:InitiateLayerUpload",
-            "ecr:UploadLayerPart",
-            "ecr:CompleteLayerUpload",
             "logs:CreateLogStream",
             "logs:PutLogEvents"
           ]
