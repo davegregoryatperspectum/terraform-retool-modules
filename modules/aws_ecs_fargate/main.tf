@@ -64,9 +64,9 @@ resource "aws_ecs_service" "retool" {
   launch_type                        = "FARGATE"
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.this.arn
-    container_name   = "retool"
-    container_port   = 3000
+    target_group_arn = aws_lb_target_group.https-sidecar.arn
+    container_name   = "https-sidecar"
+    container_port   = var.https_sidecar_task_container_port
   }
 
   network_configuration {
@@ -114,8 +114,31 @@ resource "aws_ecs_task_definition" "retool" {
         {
           containerPort = var.retool_task_container_port
         }
-      ]
-    }
+      ],
+    },
+    {
+      environment = [
+        { name = "HTTPS_PORT", value = tostring(var.https_sidecar_task_container_port) },
+        { name = "TARGET_HOST", value = "localhost" },
+        { name = "TARGET_PORT", value = tostring(var.retool_task_container_port) },
+      ],
+      logConfiguration = {
+        logDriver = var.retool_ecs_tasks_logdriver,
+        options = {
+          "awslogs-group" : aws_cloudwatch_log_group.this.name,
+          "awslogs-region" : var.aws_region,
+          "awslogs-stream-prefix" : "${var.retool_ecs_tasks_log_prefix}/https-sidecar",
+        }
+      },
+      essential = true,
+      image = var.ecs_https_sidecar_image,
+      name = "https-sidecar",
+      portMappings = [
+        {
+          containerPort = var.https_sidecar_task_container_port
+        }
+      ],
+    },
   ])
 }
 

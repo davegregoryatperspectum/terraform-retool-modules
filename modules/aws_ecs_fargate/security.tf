@@ -35,12 +35,12 @@ resource "aws_vpc_security_group_ingress_rule" "alb_ingress" {
   referenced_security_group_id = each.value.referenced_security_group_id
 }
 
-resource "aws_vpc_security_group_egress_rule" "alb_egress_to_ecs_tasks" {
+resource "aws_vpc_security_group_egress_rule" "alb_https_egress_to_ecs_tasks" {
   security_group_id = aws_security_group.alb.id
 
-  description                  = "HTTP to ECS tasks"
-  from_port                    = var.retool_task_container_port
-  to_port                      = var.retool_task_container_port
+  description                  = "HTTPS to ECS tasks"
+  from_port                    = var.https_sidecar_task_container_port
+  to_port                      = var.https_sidecar_task_container_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.ecs_tasks.id
 }
@@ -51,12 +51,12 @@ resource "aws_security_group" "ecs_tasks" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ecs_tasks_ingress_from_alb" {
+resource "aws_vpc_security_group_ingress_rule" "ecs_tasks_https_ingress_from_alb" {
   security_group_id = aws_security_group.ecs_tasks.id
 
-  description                  = "HTTP from ALB"
-  from_port                    = var.retool_task_container_port
-  to_port                      = var.retool_task_container_port
+  description                  = "HTTPS from ALB"
+  from_port                    = var.https_sidecar_task_container_port
+  to_port                      = var.https_sidecar_task_container_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.alb.id
 }

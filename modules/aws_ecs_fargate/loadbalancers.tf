@@ -15,23 +15,23 @@ resource "aws_lb_listener" "this" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
+    target_group_arn = aws_lb_target_group.https-sidecar.arn
   }
 }
 
-resource "aws_lb_target_group" "this" {
-  name                 = "${var.deployment_name}-target"
+resource "aws_lb_target_group" "https-sidecar" {
+  name                 = "${var.deployment_name}-https-sidecar-target"
   vpc_id               = var.vpc_id
   deregistration_delay = 30
-  port                 = 80
-  protocol             = "HTTP"
+  port                 = var.https_sidecar_task_container_port
+  protocol             = "HTTPS"
   target_type          = "ip"
 
 
   health_check {
     interval            = 10
     path                = "/api/checkHealth"
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 2

@@ -138,6 +138,11 @@ variable "ecs_retool_image" {
   default     = "tryretool/backend:2.106.2"
 }
 
+variable "ecs_https_sidecar_image" {
+  type        = string
+  description = "Container image for https sidecar."
+}
+
 variable "alb_listener_certificate_arn" {
   description = "Certificate Manager ARN use in ALB listener"
   type        = string
@@ -296,6 +301,12 @@ variable "retool_task_container_port" {
   description = "Retool task listening port"
   type        = number
   default     = "3000"
+}
+
+variable "https_sidecar_task_container_port" {
+  description = "HTTPS sidecar task listening port"
+  type        = number
+  default     = "8443"
 }
 
 variable "retool_task_container_name" {
