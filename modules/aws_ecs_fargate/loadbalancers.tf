@@ -24,14 +24,14 @@ resource "aws_lb_target_group" "https-sidecar" {
   vpc_id               = var.vpc_id
   deregistration_delay = 30
   port                 = var.https_sidecar_task_container_port
-  protocol             = "HTTPS"
+  protocol             = var.aws_alb_target_group_protocol
   target_type          = "ip"
 
 
   health_check {
     interval            = 10
     path                = "/api/checkHealth"
-    protocol            = "HTTPS"
+    protocol            = var.aws_alb_target_group_protocol
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 2
