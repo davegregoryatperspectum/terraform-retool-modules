@@ -20,7 +20,7 @@ resource "aws_lb_listener" "this" {
 }
 
 resource "aws_lb_target_group" "https-sidecar" {
-  name                 = "${var.deployment_name}-https-sidecar-target"
+  name                 = "${var.deployment_name}-sidecar"
   vpc_id               = var.vpc_id
   deregistration_delay = 30
   port                 = var.https_sidecar_task_container_port
@@ -35,5 +35,9 @@ resource "aws_lb_target_group" "https-sidecar" {
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 2
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
